@@ -1,6 +1,7 @@
 package com.api.products.controller;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -81,8 +83,37 @@ public class ProductController {
 		}
 	}
 
-	@GetMapping("{search}")
-	public List<ProductDto> listProductsSearch(String name, String description, Double price) {
-		return null;
+	
+	
+	@GetMapping("/search")
+	public List<ProductDto> getWithFilter( @RequestParam(required = false) String min_price,  @RequestParam(required = false) String max_price, @RequestParam(required = false) String q) {
+		List<Product> products;
+		if(q==null && min_price != null && max_price!=null) {
+			Double min = Double.parseDouble(min_price);
+			Double max = Double.parseDouble(max_price);
+			products = productRepository.findByPrice(min, max);
+			if(!products.isEmpty()) {
+				return ProductDto.convert(products); 
+			}
+		}else if (q!=null && min_price == null && max_price==null) {
+			products = productRepository.findProductByNameOrDescription(q);
+			return ProductDto.convert(products);
+		}else {
+			Double min = Double.parseDouble(min_price);
+			Double max = Double.parseDouble(max_price);
+			products = productRepository.findByPrice(min, max);
+			if(!products.isEmpty()) {
+				List<Product> productSelected = new ArrayList<Product>();;
+				for(Product product : products){
+		            if(product.getName().equals(q) || product.getDescription().equals(q)) {
+		            	productSelected.add(product);
+		            }
+		        }
+				return ProductDto.convert(productSelected); 
+			}
+			
+		}
+//		return "min_price: " + min_price + " max_price: " + max_price + " name: " + q;
+		return ProductDto.convert(products);
 	}
 }
