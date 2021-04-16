@@ -12,12 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String> {
 
-//	List<Product> findByName(String name);
-//
-//	List<Product> findByDescription(String description);
-//
-//	List<Product> findByPrice(String price);
-	
+
 	@Query("from Product where price between :min and :max")
 	List<Product> findByPrice(@Param("min") double min, @Param("max") double max);
 	

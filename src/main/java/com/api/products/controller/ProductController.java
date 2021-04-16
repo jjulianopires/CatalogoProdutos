@@ -102,8 +102,8 @@ public class ProductController {
 			Double max = Double.parseDouble(max_price);
 			products = productRepository.findByPrice(min, max);
 			if (!products.isEmpty()) {
-				List<Product> productSelected = new ArrayList<Product>();
-				;
+				List<Product> productSelected = new ArrayList<>();
+				
 				for (Product product : products) {
 					if (product.getName().equals(q) || product.getDescription().equals(q)) {
 						productSelected.add(product);

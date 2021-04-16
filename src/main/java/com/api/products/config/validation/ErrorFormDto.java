@@ -2,22 +2,20 @@ package com.api.products.config.validation;
 
 public class ErrorFormDto {
 	
-	private int status_code;
+	private int statusCode;
 	private String message;
 	
-	public ErrorFormDto(int status_code, String message) {
-		this.status_code = status_code;
+	public ErrorFormDto(int statusCode, String message) {
+		this.statusCode = statusCode;
 		this.message = message;
 	}
 
-	public int getStatus_code() {
-		return status_code;
+	public int getStatusCode() {
+		return statusCode;
 	}
 	
 	public String getMessage() {
 		return message;
 	}
-	
-	
 	
 }
