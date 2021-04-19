@@ -1,5 +1,6 @@
 package com.api.products.controller;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,9 @@ import com.api.products.controller.dto.ProductDto;
 import com.api.products.controller.dto.ProductFormDto;
 import com.api.products.model.Product;
 import com.api.products.repository.ProductRepository;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @RestController
 @RequestMapping("/products")
@@ -88,40 +92,34 @@ public class ProductController {
 		}
 	}
 
+	@ApiOperation(value = "Resgata uma lista contendo todos os produtos já cadastrados e filtrados por parâmetros")
 	@GetMapping("/search")
-	public List<ProductDto> getWithFilter(@RequestParam(required = false) String min_price,
-			@RequestParam(required = false) String max_price, @RequestParam(required = false) String q) {
-		List<Product> products = null;
+	public ResponseEntity<?> getWithFilter(
+			@RequestParam(required = false) @ApiParam(value = "Param search by min price") BigDecimal min_price,
+			@RequestParam(required = false) @ApiParam(value = "Param search by max price") BigDecimal max_price,
+			@RequestParam(required = false) @ApiParam(value = "Param search by 'name' and 'description'") String q) {
 
-		if (q != null && min_price == null || max_price == null) {
-			products = productRepository.findProductByNameOrDescription(q);
-			return ProductDto.convert(products);
+		List<Product> products = new ArrayList<>();
 
-		} else if (q != null && min_price != null && max_price != null) {
-			Double min = Double.parseDouble(min_price);
-			Double max = Double.parseDouble(max_price);
-			products = productRepository.findByPrice(min, max);
-			if (!products.isEmpty()) {
-				List<Product> productSelected = new ArrayList<>();
-				
-				for (Product product : products) {
-					if (product.getName().equals(q) || product.getDescription().equals(q)) {
-						productSelected.add(product);
-					}
+		try {
+			if (min_price == null && max_price == null) {
+				products = productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(q, q);
+				return new ResponseEntity<>(ProductDto.convert(products), HttpStatus.OK);
+			} else {
+				if (min_price == null || max_price == null) {
+					return new ResponseEntity<>(products, HttpStatus.OK);
 				}
-				return ProductDto.convert(productSelected);
-			}
 
-		} else if (q == null && min_price != null && max_price != null) {
-			Double min = Double.parseDouble(min_price);
-			Double max = Double.parseDouble(max_price);
-			products = productRepository.findByPrice(min, max);
-			if (!products.isEmpty()) {
-				return ProductDto.convert(products);
+				if (min_price.compareTo(max_price) == 1) {
+					throw new Exception();
+				} else {
+					products = productRepository.findProductByNameOrDescriptionAndPrice(q, min_price, max_price);
+					return new ResponseEntity<>(ProductDto.convert(products), HttpStatus.OK);
+				}
 			}
+		} catch (Exception e) {
+			return ResponseEntity.status(500).build();
 		}
-
-		return ProductDto.convert(products);
 
 	}
 }
