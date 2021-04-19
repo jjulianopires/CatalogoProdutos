@@ -23,23 +23,7 @@ public class ValidationErrorHandler {
 
 	@Autowired
 	private MessageSource messageSource;
-	
-//	@ResponseStatus (code = HttpStatus.BAD_REQUEST)
-//	@ExceptionHandler (MethodArgumentNotValidException.class)
-//	public List<ErrorFormDto> handle(MethodArgumentNotValidException exception){
-//		List<ErrorFormDto> dto = new ArrayList<>();
-//		
-//		List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
-//		fieldErrors.forEach(e->{
-//			String message = messageSource.getMessage(e, LocaleContextHolder.getLocale());
-//			ErrorFormDto erro = new ErrorFormDto(HttpStatus.BAD_REQUEST.value(), message);
-//			dto.add(erro);
-//		});
-//		
-//		return dto;
-//		
-//	}
-	
+
 	@ResponseStatus (code = HttpStatus.BAD_REQUEST)
 	@ExceptionHandler (MethodArgumentNotValidException.class)
 	public JsonNode handle(MethodArgumentNotValidException exception){

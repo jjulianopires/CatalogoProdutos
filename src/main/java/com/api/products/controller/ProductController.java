@@ -95,26 +95,35 @@ public class ProductController {
 	@ApiOperation(value = "Resgata uma lista contendo todos os produtos já cadastrados e filtrados por parâmetros")
 	@GetMapping("/search")
 	public ResponseEntity<?> getWithFilter(
-			@RequestParam(required = false) @ApiParam(value = "Param search by min price") BigDecimal min_price,
-			@RequestParam(required = false) @ApiParam(value = "Param search by max price") BigDecimal max_price,
+			@RequestParam(required = false, defaultValue = "0") @ApiParam(value = "Param search by min price") String min_price,
+			@RequestParam(required = false, defaultValue = "99999999") @ApiParam(value = "Param search by max price") String max_price,
 			@RequestParam(required = false) @ApiParam(value = "Param search by 'name' and 'description'") String q) {
 
 		List<Product> products = new ArrayList<>();
 
 		try {
-			if (min_price == null && max_price == null) {
-				products = productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(q, q);
+			if (min_price.equals("0") && max_price.equals("99999999")) {
+				String[] splitted = q.split(" ");
+				String aux = "%";
+
+				for (int i = 0; i < splitted.length; i++) {
+					q = aux + splitted[i] + "%";
+				}
+				products = productRepository.findProductByNameOrDescription(q);
 				return new ResponseEntity<>(ProductDto.convert(products), HttpStatus.OK);
 			} else {
-				if (min_price == null || max_price == null) {
-					return new ResponseEntity<>(products, HttpStatus.OK);
-				}
-
-				if (min_price.compareTo(max_price) == 1) {
-					throw new Exception();
+				Double min = Double.parseDouble(min_price);
+				Double max = Double.parseDouble(max_price);
+				if (min > max) {
+					throw new IllegalArgumentException();
 				} else {
-					products = productRepository.findProductByNameOrDescriptionAndPrice(q, min_price, max_price);
-					return new ResponseEntity<>(ProductDto.convert(products), HttpStatus.OK);
+					if (q != null) {
+						products = productRepository.findProductByNameOrDescriptionAndPrice(q, min, max);
+						return new ResponseEntity<>(ProductDto.convert(products), HttpStatus.OK);
+					} else {
+						products = productRepository.findByPrice(min, max);
+						return new ResponseEntity<>(ProductDto.convert(products), HttpStatus.OK);
+					}
 				}
 			}
 		} catch (Exception e) {
