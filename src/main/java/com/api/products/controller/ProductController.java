@@ -92,7 +92,7 @@ public class ProductController {
 		}
 	}
 
-	@ApiOperation(value = "Resgata uma lista contendo todos os produtos já cadastrados e filtrados por parâmetros")
+	@ApiOperation(value = "Returns a list containing all products already registered and filtered by parameters")
 	@GetMapping("/search")
 	public ResponseEntity<?> getWithFilter(
 			@RequestParam(required = false, defaultValue = "0") @ApiParam(value = "Param search by min price") String min_price,
